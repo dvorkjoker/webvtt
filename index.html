@@ -4,16 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WEBVTT to Plain Text Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea, input[type="file"] {
+            width: 80%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 14px;
+        }
+        button, a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button:hover, a:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            width: 80%;
+            height: 150px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>WEBVTT to Plain Text Converter</h1>
 
     <!-- File Upload -->
-    <input type="file" id="fileInput" accept=".vtt">
-    <br>
-    <a id="downloadLink" style="display:none;">Download Converted Text</a>
+    <div>
+        <h2>Convert File</h2>
+        <input type="file" id="fileInput" accept=".vtt">
+    </div>
+
+    <!-- Textarea Conversion -->
+    <div>
+        <h2>Convert Text</h2>
+        <textarea id="input" rows="10" placeholder="Paste your WEBVTT content here..."></textarea>
+        <br>
+        <button onclick="convertTextarea()">Convert to Plain Text</button>
+        <textarea id="output" rows="10" readonly placeholder="Converted plain text will appear here..."></textarea>
+    </div>
 
     <script>
+        // File Upload Conversion
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
 
         function handleFileUpload(event) {
@@ -24,19 +72,28 @@
             reader.onload = function(e) {
                 const content = e.target.result;
                 const plainText = convertToPlainText(content);
-                
-                // Create a downloadable file
+
+                // Automatically trigger download
                 const blob = new Blob([plainText], { type: 'text/plain' });
-                const downloadLink = document.getElementById('downloadLink');
-                downloadLink.href = URL.createObjectURL(blob);
-                downloadLink.download = file.name.replace(/\.vtt$/, '.txt');
-                downloadLink.style.display = 'inline';
-                downloadLink.textContent = 'Download Converted Text';
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = file.name.replace(/\.vtt$/, '.txt');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
             };
 
             reader.readAsText(file);
         }
 
+        // Textarea Conversion
+        function convertTextarea() {
+            const input = document.getElementById('input').value;
+            const plainText = convertToPlainText(input);
+            document.getElementById('output').value = plainText;
+        }
+
+        // Common Conversion Function
         function convertToPlainText(content) {
             const lines = content.split('\n');
             return lines
