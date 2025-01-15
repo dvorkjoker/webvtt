@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEBVTT to Plain Text Converter</title>
+</head>
+<body>
+    <h1>WEBVTT to Plain Text Converter</h1>
+    <textarea id="input" rows="10" cols="50" placeholder="Paste your WEBVTT content here"></textarea>
+    <br>
+    <button onclick="convert()">Convert to Plain Text</button>
+    <br>
+    <textarea id="output" rows="10" cols="50" placeholder="Converted plain text will appear here"></textarea>
+
+    <script>
+        function convert() {
+            const input = document.getElementById('input').value;
+            const lines = input.split('\n');
+            const plainText = lines
+                .filter(line => line.trim() && !line.startsWith('WEBVTT') && !line.match(/^[0-9]+$/) && !line.includes('-->'))
+                .join('\n');
+            document.getElementById('output').value = plainText;
+        }
+    </script>
+</body>
+</html>
