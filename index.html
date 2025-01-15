@@ -7,20 +7,41 @@
 </head>
 <body>
     <h1>WEBVTT to Plain Text Converter</h1>
-    <textarea id="input" rows="10" cols="50" placeholder="Paste your WEBVTT content here"></textarea>
+
+    <!-- File Upload -->
+    <input type="file" id="fileInput" accept=".vtt">
     <br>
-    <button onclick="convert()">Convert to Plain Text</button>
-    <br>
-    <textarea id="output" rows="10" cols="50" placeholder="Converted plain text will appear here"></textarea>
+    <a id="downloadLink" style="display:none;">Download Converted Text</a>
 
     <script>
-        function convert() {
-            const input = document.getElementById('input').value;
-            const lines = input.split('\n');
-            const plainText = lines
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const plainText = convertToPlainText(content);
+                
+                // Create a downloadable file
+                const blob = new Blob([plainText], { type: 'text/plain' });
+                const downloadLink = document.getElementById('downloadLink');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = file.name.replace(/\.vtt$/, '.txt');
+                downloadLink.style.display = 'inline';
+                downloadLink.textContent = 'Download Converted Text';
+            };
+
+            reader.readAsText(file);
+        }
+
+        function convertToPlainText(content) {
+            const lines = content.split('\n');
+            return lines
                 .filter(line => line.trim() && !line.startsWith('WEBVTT') && !line.match(/^[0-9]+$/) && !line.includes('-->'))
                 .join('\n');
-            document.getElementById('output').value = plainText;
         }
     </script>
 </body>
