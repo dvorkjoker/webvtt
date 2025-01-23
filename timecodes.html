@@ -16,16 +16,18 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        .textarea-container {
+            display: flex;
+            justify-content: space-between;
+        }
         textarea {
-            width: 48%;
+            flex: 1;
             height: 300px;
-            margin: 10px 1%;
+            margin: 10px;
             padding: 10px;
             font-size: 14px;
-            display: inline-block;
             border: 1px solid #ccc;
             border-radius: 4px;
-            vertical-align: top;
         }
         button, input[type="file"] {
             display: inline-block;
@@ -68,7 +70,7 @@
     </div>
 
     <!-- Textarea Conversion Section -->
-    <div>
+    <div class="textarea-container">
         <textarea id="input" placeholder="Original WEBVTT content"></textarea>
         <textarea id="output" placeholder="Converted WEBVTT content" readonly></textarea>
     </div>
@@ -97,10 +99,10 @@
             const frameRate = parseFloat(document.getElementById('frameRate').value) || 25;
             const input = document.getElementById('input').value;
             const lines = input.split('\n');
-
+        
             const convertedContent = lines.map(line => convertTimecodes(line, frameRate)).join('\n');
             document.getElementById('output').value = convertedContent;
-
+        
             if (uploadedFile) {
                 // Process the uploaded file's rows with the updated frame rate
                 const convertedRows = uploadedFile.rows.map(row => {
@@ -109,12 +111,14 @@
                     }
                     return [''];
                 });
-
+        
                 const outputWorkbook = XLSX.utils.book_new();
                 const outputSheet = XLSX.utils.aoa_to_sheet(convertedRows);
                 XLSX.utils.book_append_sheet(outputWorkbook, outputSheet, 'Converted');
-
-                const blob = XLSX.write(outputWorkbook, { bookType: 'xlsx', type: 'blob' });
+        
+                // Write as an array and wrap in a Blob
+                const arrayBuffer = XLSX.write(outputWorkbook, { bookType: 'xlsx', type: 'array' });
+                const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
                 a.download = uploadedFile.file.name.replace(/\.xlsx$/, '-converted.xlsx');
@@ -123,6 +127,7 @@
                 document.body.removeChild(a);
             }
         }
+
 
         function convertTimecodes(line, frameRate) {
             return line.replace(/(\d{2}:\d{2}:\d{2})\.(\d{3})/g, (match, time, milliseconds) => {
