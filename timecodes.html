@@ -109,15 +109,21 @@
             const sheet = workbook.Sheets[sheetName];
             const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
+            // Populate the textarea with the original WebVTT content
+            const originalContent = rows.map(row => row[0]).join('\n');
+            document.getElementById('input').value = originalContent;
+
+            // Convert the timecodes
             const convertedRows = rows.map(row => {
                 if (row.length > 0) {
-                    return convertTimecodes(row[0], frameRate);
+                    return [convertTimecodes(row[0], frameRate)];
                 }
-                return '';
+                return [''];
             });
 
+            // Create a new workbook for the converted data
             const outputWorkbook = XLSX.utils.book_new();
-            const outputSheet = XLSX.utils.aoa_to_sheet(convertedRows.map(row => [row]));
+            const outputSheet = XLSX.utils.aoa_to_sheet(convertedRows);
             XLSX.utils.book_append_sheet(outputWorkbook, outputSheet, 'Converted');
 
             const blob = XLSX.write(outputWorkbook, { bookType: 'xlsx', type: 'blob' });
